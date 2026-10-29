@@ -34,29 +34,54 @@ const STORAGE_KEYS = {
 };
 
 class StorageService {
+  private memoryStore: Record<string, string> = {};
+
   constructor() {
     this.init();
   }
 
+  private getStorage(): Storage | null {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        return window.localStorage;
+      }
+      if (typeof localStorage !== 'undefined') {
+        return localStorage;
+      }
+    } catch {
+      // Storage access may be blocked by iframe or browser permissions
+    }
+    return null;
+  }
+
   public init(forceReset = false): void {
-    const isInitialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
+    const ls = this.getStorage();
+    const isInitialized = ls ? ls.getItem(STORAGE_KEYS.INITIALIZED) : this.memoryStore[STORAGE_KEYS.INITIALIZED];
     if (!isInitialized || forceReset) {
       // Also check if v1 user existed to preserve their session
-      const prevUser = localStorage.getItem('lms_current_user_v1');
+      const prevUser = ls ? ls.getItem('lms_current_user_v1') : this.memoryStore['lms_current_user_v1'];
       
-      localStorage.setItem(STORAGE_KEYS.BOOKS, JSON.stringify(INITIAL_BOOKS));
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
-      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
-      localStorage.setItem(STORAGE_KEYS.PASSWORDS, JSON.stringify(DEMO_CREDENTIALS));
-      localStorage.setItem(STORAGE_KEYS.BORROW_RECORDS, JSON.stringify(INITIAL_BORROW_RECORDS));
-      localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(INITIAL_NOTIFICATIONS));
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(INITIAL_SETTINGS));
-      localStorage.setItem(STORAGE_KEYS.FAVOURITES, JSON.stringify(INITIAL_FAVOURITES));
-      localStorage.setItem(STORAGE_KEYS.RECENTLY_VIEWED, JSON.stringify(['b-1', 'b-2', 'b-4']));
-      localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
+      this.setItem(STORAGE_KEYS.BOOKS, INITIAL_BOOKS);
+      this.setItem(STORAGE_KEYS.CATEGORIES, INITIAL_CATEGORIES);
+      this.setItem(STORAGE_KEYS.USERS, INITIAL_USERS);
+      this.setItem(STORAGE_KEYS.PASSWORDS, DEMO_CREDENTIALS);
+      this.setItem(STORAGE_KEYS.BORROW_RECORDS, INITIAL_BORROW_RECORDS);
+      this.setItem(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
+      this.setItem(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
+      this.setItem(STORAGE_KEYS.FAVOURITES, INITIAL_FAVOURITES);
+      this.setItem(STORAGE_KEYS.RECENTLY_VIEWED, ['b-1', 'b-2', 'b-4']);
+      if (ls) {
+        ls.setItem(STORAGE_KEYS.INITIALIZED, 'true');
+      } else {
+        this.memoryStore[STORAGE_KEYS.INITIALIZED] = 'true';
+      }
 
       if (prevUser) {
-        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, prevUser);
+        if (ls) {
+          ls.setItem(STORAGE_KEYS.CURRENT_USER, prevUser);
+        } else {
+          this.memoryStore[STORAGE_KEYS.CURRENT_USER] = prevUser;
+        }
       }
     } else {
       // Automatic data integrity check: replace any unsplash links with robust SVG covers
@@ -73,8 +98,9 @@ class StorageService {
       INITIAL_USERS.forEach((initialUser) => {
         const existingIdx = users.findIndex(
           (u) =>
-            (initialUser.username && u.username && u.username.toLowerCase() === initialUser.username.toLowerCase()) ||
-            u.email.toLowerCase() === initialUser.email.toLowerCase()
+            u.id === initialUser.id ||
+            (initialUser.username && typeof u.username === 'string' && u.username.toLowerCase() === initialUser.username.toLowerCase()) ||
+            (typeof u.email === 'string' && u.email.toLowerCase() === initialUser.email.toLowerCase())
         );
 
         if (existingIdx === -1) {
@@ -149,20 +175,27 @@ class StorageService {
   // Safe item getter
   private getItem<T>(key: string, defaultValue: T): T {
     try {
-      const data = localStorage.getItem(key);
+      const ls = this.getStorage();
+      const data = ls ? ls.getItem(key) : this.memoryStore[key];
       if (!data) return defaultValue;
       return JSON.parse(data) as T;
     } catch (e) {
-      console.error(`Error reading ${key} from localStorage:`, e);
+      console.error(`Error reading ${key} from storage:`, e);
       return defaultValue;
     }
   }
 
   private setItem<T>(key: string, value: T): void {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const serialized = JSON.stringify(value);
+      const ls = this.getStorage();
+      if (ls) {
+        ls.setItem(key, serialized);
+      } else {
+        this.memoryStore[key] = serialized;
+      }
     } catch (e) {
-      console.error(`Error saving ${key} to localStorage:`, e);
+      console.error(`Error saving ${key} to storage:`, e);
     }
   }
 
@@ -321,26 +354,59 @@ class StorageService {
   public getUserByUsernameOrEmail(identifier: string): User | undefined {
     if (!identifier) return undefined;
     const clean = identifier.trim().toLowerCase();
-    return this.getUsers().find(
+    const users = this.getUsers();
+
+    // 1. Direct match on username or email
+    const match = users.find(
       (u) =>
-        (u.username && u.username.toLowerCase() === clean) ||
-        (u.email && u.email.toLowerCase() === clean)
+        (typeof u.username === 'string' && u.username.toLowerCase() === clean) ||
+        (typeof u.email === 'string' && u.email.toLowerCase() === clean)
+    );
+    if (match) return match;
+
+    // 2. Legacy alias check (for users migrated from older email-only versions)
+    if (clean === 'tanvir') {
+      const legacyTanvir = users.find((u) => u.id === 'u-tanvir' || u.email.toLowerCase() === 'member@library.edu');
+      if (legacyTanvir) return legacyTanvir;
+    }
+    if (clean === 'admin') {
+      const legacyAdmin = users.find((u) => u.id === 'u-admin' || u.email.toLowerCase() === 'admin@library.edu');
+      if (legacyAdmin) return legacyAdmin;
+    }
+
+    // 3. Fallback to INITIAL_USERS
+    return INITIAL_USERS.find(
+      (u) =>
+        (typeof u.username === 'string' && u.username.toLowerCase() === clean) ||
+        (typeof u.email === 'string' && u.email.toLowerCase() === clean)
     );
   }
 
   public getPasswords(): Record<string, string> {
     const stored = this.getItem<Record<string, string>>(STORAGE_KEYS.PASSWORDS, DEMO_CREDENTIALS);
-    return { ...DEMO_CREDENTIALS, ...stored };
+    return { ...stored, ...DEMO_CREDENTIALS };
   }
 
   public getUserPassword(identifier: string): string | undefined {
     if (!identifier) return undefined;
     const clean = identifier.trim().toLowerCase();
+
+    // Predefined demo credentials take precedence
+    if (DEMO_CREDENTIALS[clean]) {
+      return DEMO_CREDENTIALS[clean];
+    }
+
     const passwords = this.getPasswords();
     if (passwords[clean]) return passwords[clean];
 
     const user = this.getUserByUsernameOrEmail(identifier);
     if (user) {
+      if (user.username && DEMO_CREDENTIALS[user.username.toLowerCase()]) {
+        return DEMO_CREDENTIALS[user.username.toLowerCase()];
+      }
+      if (user.email && DEMO_CREDENTIALS[user.email.toLowerCase()]) {
+        return DEMO_CREDENTIALS[user.email.toLowerCase()];
+      }
       if (passwords[user.email.toLowerCase()]) return passwords[user.email.toLowerCase()];
       if (user.username && passwords[user.username.toLowerCase()]) return passwords[user.username.toLowerCase()];
     }

@@ -562,14 +562,15 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await refreshData();
       addToast('info', 'Category Deleted', 'The category has been removed.');
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = normalizeErrorMessage(err, 'Failed to delete category.');
       try {
         storage.deleteCategory(id);
         refreshData();
         addToast('info', 'Category Deleted', 'The category has been removed.');
         return true;
-      } catch (storageErr: any) {
-        addToast('error', 'Cannot Delete Category', err.message || storageErr.message);
+      } catch (storageErr: unknown) {
+        addToast('error', 'Cannot Delete Category', normalizeErrorMessage(storageErr, errMsg));
         return false;
       }
     }

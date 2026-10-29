@@ -20,10 +20,13 @@ export async function getCsrfToken(): Promise<string> {
   if (csrfToken) return csrfToken;
   try {
     const res = await fetch(resolveApiUrl('/api/auth/csrf'), { credentials: 'include' });
-    const data = await res.json();
-    if (data && data.success && data.data?.csrf_token) {
-      csrfToken = data.data.csrf_token;
-      return csrfToken as string;
+    const contentType = res.headers.get('content-type') || '';
+    if (res.ok && contentType.includes('application/json')) {
+      const data = await res.json();
+      if (data && data.success && data.data?.csrf_token) {
+        csrfToken = data.data.csrf_token;
+        return csrfToken as string;
+      }
     }
   } catch (err) {
     console.warn('Could not fetch CSRF token:', err);

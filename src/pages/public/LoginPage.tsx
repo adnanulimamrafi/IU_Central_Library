@@ -22,8 +22,8 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('tanvir');
+  const [password, setPassword] = useState('User@123');
   const [showPassword, setShowPassword] = useState(false);
   const [showDemoPasswords, setShowDemoPasswords] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);

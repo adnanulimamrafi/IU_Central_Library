@@ -1,6 +1,6 @@
 import assert from 'node:assert';
-import { normalizeErrorMessage, isBackendUnavailable, safeStringIncludes } from '../utils/errors.ts';
-import { INITIAL_USERS, DEMO_CREDENTIALS } from '../services/mockData.ts';
+import { normalizeErrorMessage, isBackendUnavailable, safeStringIncludes } from '../src/utils/errors.ts';
+import { INITIAL_USERS, DEMO_CREDENTIALS } from '../src/services/mockData.ts';
 
 console.log('--- Running Auth Resilience & Error Normalization Tests ---');
 
