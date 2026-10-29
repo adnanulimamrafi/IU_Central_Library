@@ -39,13 +39,13 @@ const normalizeStudentId = (user: any): string | undefined => {
     String(user.id) === '2';
 
   if (isTanvir) {
-    return 'CSE-214028';
+    return '2114028';
   }
 
   const raw = user.member_id || user.studentId;
   if (!raw) return undefined;
-  if (raw === 'CSE-2021-089' || raw === '2114028' || raw === '214028') {
-    return 'CSE-214028';
+  if (raw === 'CSE-2021-089' || raw === 'CSE-214028' || raw === '214028') {
+    return '2114028';
   }
   return raw;
 };

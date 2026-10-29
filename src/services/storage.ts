@@ -479,8 +479,8 @@ class StorageService {
         user.id === 'u-tanvir' ||
         user.id === '2';
 
-      if (isTanvir && user.studentId !== 'CSE-214028') {
-        user.studentId = 'CSE-214028';
+      if (isTanvir && user.studentId !== '2114028') {
+        user.studentId = '2114028';
         this.setItem(STORAGE_KEYS.CURRENT_USER, user);
       }
     }
@@ -497,8 +497,8 @@ class StorageService {
         user.id === 'u-tanvir' ||
         user.id === '2';
 
-      if (isTanvir && user.studentId !== 'CSE-214028') {
-        user.studentId = 'CSE-214028';
+      if (isTanvir && user.studentId !== '2114028') {
+        user.studentId = '2114028';
       }
       this.setItem(STORAGE_KEYS.CURRENT_USER, user);
     }

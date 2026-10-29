@@ -33,9 +33,9 @@ const initials4 = getInitials('Adnan Ul Imam Rafi');
 console.assert(initials4 === 'AU', `Expected AU but got ${initials4}`);
 console.log('✓ Initials fallback helper passed all assertions');
 
-// 2. Roll / subtitle formatting (Roll: CSE-214028)
-const sub1 = formatUserSubtitle({ role: 'student', studentId: 'CSE-214028' });
-console.assert(sub1 === 'Roll: CSE-214028', `Expected 'Roll: CSE-214028' but got '${sub1}'`);
+// 2. Roll / subtitle formatting (Roll: 2114028)
+const sub1 = formatUserSubtitle({ role: 'student', studentId: '2114028' });
+console.assert(sub1 === 'Roll: 2114028', `Expected 'Roll: 2114028' but got '${sub1}'`);
 const sub2 = formatUserSubtitle({ role: 'admin' });
 console.assert(sub2 === 'Administrator', `Expected 'Administrator' but got '${sub2}'`);
 const sub3 = formatUserSubtitle({ role: 'student' });
@@ -78,7 +78,7 @@ storage.setCurrentUser({
 });
 
 const migrated = storage.getCurrentUser();
-console.assert(migrated?.studentId === 'CSE-214028', `Expected CSE-214028 but got ${migrated?.studentId}`);
-console.log('✓ Stored user roll automatically migrated to CSE-214028');
+console.assert(migrated?.studentId === '2114028', `Expected 2114028 but got ${migrated?.studentId}`);
+console.log('✓ Stored user roll automatically migrated to 2114028');
 
 console.log('--- All Profile & Responsiveness Logic Verified Successfully ---');

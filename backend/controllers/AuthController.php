@@ -44,8 +44,8 @@ class AuthController {
         // Omit password hash from response
         unset($user['password_hash']);
 
-        if (strtolower($user['username'] ?? '') === 'tanvir' || strtolower($user['email'] ?? '') === 'tanvir@student.edu' || ($user['member_id'] ?? '') === 'CSE-2021-089') {
-            $user['member_id'] = 'CSE-214028';
+        if (strtolower($user['username'] ?? '') === 'tanvir' || strtolower($user['email'] ?? '') === 'tanvir@student.edu' || in_array($user['member_id'] ?? '', ['CSE-2021-089', 'CSE-214028', '214028'], true)) {
+            $user['member_id'] = '2114028';
         }
 
         Response::json([
@@ -76,8 +76,8 @@ class AuthController {
         }
 
         unset($user['password_hash']);
-        if (strtolower($user['username'] ?? '') === 'tanvir' || strtolower($user['email'] ?? '') === 'tanvir@student.edu' || ($user['member_id'] ?? '') === 'CSE-2021-089') {
-            $user['member_id'] = 'CSE-214028';
+        if (strtolower($user['username'] ?? '') === 'tanvir' || strtolower($user['email'] ?? '') === 'tanvir@student.edu' || in_array($user['member_id'] ?? '', ['CSE-2021-089', 'CSE-214028', '214028'], true)) {
+            $user['member_id'] = '2114028';
         }
         Response::json([
             'user' => $user,

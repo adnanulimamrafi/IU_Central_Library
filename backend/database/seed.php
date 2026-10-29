@@ -81,7 +81,7 @@ function runSeeder(): void {
             'email' => 'tanvir@student.edu',
             'password' => 'User@123',
             'role' => 'member',
-            'member_id' => 'CSE-214028',
+            'member_id' => '2114028',
             'department' => 'Computer Science & Engineering',
             'session' => '2021-22',
             'phone' => '+880 1712-345678',
@@ -342,7 +342,7 @@ function runSeeder(): void {
         Notification::create([
             'user_id' => $tanvirId,
             'title' => 'Welcome to Central Digital Library',
-            'message' => 'Your student account (CSE-214028) is active. You can borrow up to 5 books concurrently.',
+            'message' => 'Your student account (2114028) is active. You can borrow up to 5 books concurrently.',
             'type' => 'info',
             'action_url' => '/catalogue',
         ]);
