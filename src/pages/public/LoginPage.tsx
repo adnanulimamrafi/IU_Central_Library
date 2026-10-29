@@ -163,6 +163,26 @@ export const LoginPage: React.FC = () => {
                 </button>
               </div>
               <div className="flex justify-between items-center bg-white/70 dark:bg-charcoal-900/70 p-1.5 rounded-lg">
+                <span>student1 / Student@123</span>
+                <button
+                  type="button"
+                  onClick={() => handleFillCredentials('student1', 'Student@123')}
+                  className="text-[10px] text-forest-700 dark:text-amber-400 font-sans font-semibold hover:underline"
+                >
+                  Fill Form
+                </button>
+              </div>
+              <div className="flex justify-between items-center bg-white/70 dark:bg-charcoal-900/70 p-1.5 rounded-lg">
+                <span>student2 / Student@123</span>
+                <button
+                  type="button"
+                  onClick={() => handleFillCredentials('student2', 'Student@123')}
+                  className="text-[10px] text-forest-700 dark:text-amber-400 font-sans font-semibold hover:underline"
+                >
+                  Fill Form
+                </button>
+              </div>
+              <div className="flex justify-between items-center bg-white/70 dark:bg-charcoal-900/70 p-1.5 rounded-lg">
                 <span>admin / Admin@123</span>
                 <button
                   type="button"

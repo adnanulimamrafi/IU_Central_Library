@@ -61,6 +61,47 @@ class StorageService {
     } else {
       // Automatic data integrity check: replace any unsplash links with robust SVG covers
       this.repairBrokenCovers();
+      this.ensureDemoAccounts();
+    }
+  }
+
+  private ensureDemoAccounts(): void {
+    try {
+      const users = this.getItem<User[]>(STORAGE_KEYS.USERS, INITIAL_USERS);
+      let usersChanged = false;
+
+      INITIAL_USERS.forEach((initialUser) => {
+        const existingIdx = users.findIndex(
+          (u) =>
+            (initialUser.username && u.username && u.username.toLowerCase() === initialUser.username.toLowerCase()) ||
+            u.email.toLowerCase() === initialUser.email.toLowerCase()
+        );
+
+        if (existingIdx === -1) {
+          users.push(initialUser);
+          usersChanged = true;
+        } else {
+          // Keep username & studentId synchronized
+          if (!users[existingIdx].username && initialUser.username) {
+            users[existingIdx].username = initialUser.username;
+            usersChanged = true;
+          }
+          if (!users[existingIdx].studentId && initialUser.studentId) {
+            users[existingIdx].studentId = initialUser.studentId;
+            usersChanged = true;
+          }
+        }
+      });
+
+      if (usersChanged) {
+        this.setItem(STORAGE_KEYS.USERS, users);
+      }
+
+      const storedPasswords = this.getItem<Record<string, string>>(STORAGE_KEYS.PASSWORDS, DEMO_CREDENTIALS);
+      const mergedPasswords = { ...storedPasswords, ...DEMO_CREDENTIALS };
+      this.setItem(STORAGE_KEYS.PASSWORDS, mergedPasswords);
+    } catch (e) {
+      console.warn('Demo accounts sync error:', e);
     }
   }
 
@@ -277,8 +318,33 @@ class StorageService {
     return this.getUsers().find((u) => u.email.toLowerCase() === email.toLowerCase());
   }
 
+  public getUserByUsernameOrEmail(identifier: string): User | undefined {
+    if (!identifier) return undefined;
+    const clean = identifier.trim().toLowerCase();
+    return this.getUsers().find(
+      (u) =>
+        (u.username && u.username.toLowerCase() === clean) ||
+        (u.email && u.email.toLowerCase() === clean)
+    );
+  }
+
   public getPasswords(): Record<string, string> {
-    return this.getItem<Record<string, string>>(STORAGE_KEYS.PASSWORDS, DEMO_CREDENTIALS);
+    const stored = this.getItem<Record<string, string>>(STORAGE_KEYS.PASSWORDS, DEMO_CREDENTIALS);
+    return { ...DEMO_CREDENTIALS, ...stored };
+  }
+
+  public getUserPassword(identifier: string): string | undefined {
+    if (!identifier) return undefined;
+    const clean = identifier.trim().toLowerCase();
+    const passwords = this.getPasswords();
+    if (passwords[clean]) return passwords[clean];
+
+    const user = this.getUserByUsernameOrEmail(identifier);
+    if (user) {
+      if (passwords[user.email.toLowerCase()]) return passwords[user.email.toLowerCase()];
+      if (user.username && passwords[user.username.toLowerCase()]) return passwords[user.username.toLowerCase()];
+    }
+    return undefined;
   }
 
   public registerUser(userData: Omit<User, 'id' | 'createdAt' | 'status'>, password: string): User {

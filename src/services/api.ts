@@ -4,15 +4,24 @@
  */
 
 import { Book, Category, BorrowRecord, NotificationItem, LibrarySettings, User } from '../types';
+import { normalizeErrorMessage } from '../utils/errors';
 
 let csrfToken: string | null = null;
+
+// Allow configurable API base URL via environment variable (e.g., for production deployment on Render, Railway, VPS, Apache)
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/+$/, '');
+
+export function resolveApiUrl(endpoint: string): string {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return API_BASE_URL ? `${API_BASE_URL}${cleanEndpoint}` : cleanEndpoint;
+}
 
 export async function getCsrfToken(): Promise<string> {
   if (csrfToken) return csrfToken;
   try {
-    const res = await fetch('/api/auth/csrf', { credentials: 'include' });
+    const res = await fetch(resolveApiUrl('/api/auth/csrf'), { credentials: 'include' });
     const data = await res.json();
-    if (data.success && data.data?.csrf_token) {
+    if (data && data.success && data.data?.csrf_token) {
       csrfToken = data.data.csrf_token;
       return csrfToken as string;
     }
@@ -25,8 +34,8 @@ export async function getCsrfToken(): Promise<string> {
 export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
-): Promise<{ success: boolean; data?: T; error?: string; errors?: any }> {
-  const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+): Promise<{ success: boolean; data?: T; error?: string; errors?: any; status?: number }> {
+  const url = resolveApiUrl(endpoint);
 
   const headers: Record<string, string> = {
     Accept: 'application/json',
@@ -53,11 +62,44 @@ export async function apiRequest<T = any>(
       credentials: 'include', // Ensures PHP session cookies are transmitted
     });
 
-    const json = await response.json().catch(() => null);
+    let json: any = null;
+    let rawText: string = '';
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      try {
+        json = await response.json();
+      } catch {
+        json = null;
+      }
+    } else {
+      try {
+        rawText = await response.text();
+      } catch {
+        rawText = '';
+      }
+    }
 
     if (!response.ok) {
-      const errorMsg = json?.error || `Request failed with status ${response.status}`;
-      return { success: false, error: errorMsg, errors: json?.errors };
+      let rawError: unknown = json?.error || json?.message || json?.errors;
+      if (!rawError && rawText) {
+        rawError = rawText;
+      }
+      if (!rawError) {
+        rawError = `Request failed with status ${response.status}`;
+      }
+
+      const errorMsg = normalizeErrorMessage(
+        rawError,
+        `Request failed with status ${response.status}`
+      );
+
+      return {
+        success: false,
+        error: errorMsg,
+        errors: json?.errors,
+        status: response.status,
+      };
     }
 
     if (json?.data?.csrf_token) {
@@ -67,11 +109,17 @@ export async function apiRequest<T = any>(
     return {
       success: true,
       data: json?.data !== undefined ? json.data : (json as T),
+      status: response.status,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = normalizeErrorMessage(
+      error,
+      'Network error occurred. Please verify backend server is running.'
+    );
     return {
       success: false,
-      error: error.message || 'Network error occurred. Please verify backend server is running.',
+      error: errorMsg,
+      status: 0,
     };
   }
 }

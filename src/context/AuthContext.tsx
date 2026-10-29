@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Role } from '../types';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
+import { normalizeErrorMessage, isBackendUnavailable } from '../utils/errors';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -119,14 +120,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (usernameOrEmail: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    const cleanIdentifier = (usernameOrEmail || '').trim();
+    if (!cleanIdentifier || !password) {
+      return { success: false, error: 'Please enter both username and password.' };
+    }
+
     try {
       // 1. Try PHP Backend API first
-      const res = await api.auth.login(usernameOrEmail.trim(), password);
+      const res = await api.auth.login(cleanIdentifier, password);
       if (res.success && res.user) {
         const userObj: User = {
           id: String(res.user.id),
           name: (res.user as any).full_name || res.user.name,
-          username: (res.user as any).username || res.user.username || usernameOrEmail.trim(),
+          username: (res.user as any).username || res.user.username || cleanIdentifier,
           email: res.user.email,
           role: res.user.role,
           studentId: (res.user as any).member_id || res.user.studentId,
@@ -144,25 +150,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: true };
       }
 
-      // If backend returned specific error
-      if (res.error && !res.error.includes('Network error')) {
-        return { success: false, error: res.error };
+      const errorMsg = normalizeErrorMessage(res.error);
+      const isUnavailable = isBackendUnavailable(res);
+
+      // If backend is active and returned a business authentication rejection (e.g., 401 Invalid credentials, 403 Suspended), return that error
+      if (!isUnavailable) {
+        return { success: false, error: errorMsg || 'Invalid credentials. Please verify and try again.' };
       }
 
-      // 2. Storage fallback if backend is unreachable
-      const localUser = storage.getUserByEmail(usernameOrEmail);
+      // 2. Storage fallback when backend is unreachable / offline / 404 (e.g., frontend-only Vercel hosting)
+      const localUser = storage.getUserByUsernameOrEmail(cleanIdentifier);
       if (localUser) {
-        const passwords = storage.getPasswords();
-        if (passwords[usernameOrEmail.toLowerCase()] === password) {
+        if (localUser.status === 'suspended') {
+          return { success: false, error: 'This account has been suspended. Please contact the library administrator.' };
+        }
+
+        const expectedPassword = storage.getUserPassword(cleanIdentifier);
+        if (expectedPassword && expectedPassword === password) {
           storage.setCurrentUser(localUser);
           setCurrentUser(localUser);
           return { success: true };
         }
+
+        return { success: false, error: 'Invalid password. Please check your credentials and try again.' };
       }
 
-      return { success: false, error: res.error || 'Invalid credentials. Please verify and try again.' };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Authentication failed.' };
+      return { success: false, error: errorMsg || 'Invalid credentials. No account found.' };
+    } catch (err: unknown) {
+      return { success: false, error: normalizeErrorMessage(err, 'Authentication failed.') };
     }
   };
 
@@ -228,8 +243,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       storage.setCurrentUser(newUser);
       setCurrentUser(newUser);
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Registration failed.' };
+    } catch (err: unknown) {
+      return { success: false, error: normalizeErrorMessage(err, 'Registration failed.') };
     }
   };
 
@@ -277,9 +292,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: true };
       }
       if (res.error) {
-        return { success: false, error: res.error };
+        return { success: false, error: normalizeErrorMessage(res.error) };
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.warn('Backend password change failed:', err);
     }
 

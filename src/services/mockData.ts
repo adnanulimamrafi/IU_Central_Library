@@ -474,6 +474,7 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'u-admin',
     name: 'Md. Mojahidul Islam',
+    username: 'admin',
     email: 'admin@library.edu',
     role: 'admin',
     department: 'Computer Science & Engineering',
@@ -486,7 +487,8 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'u-tanvir',
     name: 'Tanvir Ahmed',
-    email: 'member@library.edu',
+    username: 'tanvir',
+    email: 'tanvir@student.edu',
     role: 'member',
     studentId: '2114028',
     department: 'Computer Science & Engineering',
@@ -498,15 +500,46 @@ export const INITIAL_USERS: User[] = [
     createdAt: '2025-09-01T00:00:00Z',
   },
   {
-    id: 'u-sarah',
-    name: 'Sarah Rahman',
-    email: 'sarah.rahman@iu.ac.bd',
+    id: 'u-student1',
+    name: 'Nusrat Jahan',
+    username: 'student1',
+    email: 'student1@student.edu',
     role: 'member',
     studentId: '2114015',
     department: 'Computer Science & Engineering',
     session: '2021-22',
-    phone: '+880 1712-987654',
+    phone: '+880 1711-100001',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&q=80',
+    bio: 'CSE Undergraduate student researching Machine Learning and NLP.',
+    status: 'active',
+    createdAt: '2025-09-10T00:00:00Z',
+  },
+  {
+    id: 'u-student2',
+    name: 'Ariful Islam',
+    username: 'student2',
+    email: 'student2@student.edu',
+    role: 'member',
+    studentId: '2114022',
+    department: 'Computer Science & Engineering',
+    session: '2021-22',
+    phone: '+880 1711-100002',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80',
+    bio: 'Undergraduate student interested in database design, algorithms, and software testing.',
+    status: 'active',
+    createdAt: '2025-09-15T00:00:00Z',
+  },
+  {
+    id: 'u-sarah',
+    name: 'Sarah Rahman',
+    username: 'sarah',
+    email: 'sarah.rahman@iu.ac.bd',
+    role: 'member',
+    studentId: '2114018',
+    department: 'Computer Science & Engineering',
+    session: '2021-22',
+    phone: '+880 1712-987654',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
     bio: 'CSE Undergraduate student researching Machine Learning and NLP.',
     status: 'active',
     createdAt: '2025-09-10T00:00:00Z',
@@ -514,6 +547,7 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'u-arif',
     name: 'Arif Hasan',
+    username: 'arif',
     email: 'arif.hasan@iu.ac.bd',
     role: 'member',
     studentId: '2114042',
@@ -528,6 +562,7 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'u-nafisa',
     name: 'Nafisa Kamal',
+    username: 'nafisa',
     email: 'nafisa.kamal@iu.ac.bd',
     role: 'member',
     studentId: '2214008',
@@ -541,12 +576,25 @@ export const INITIAL_USERS: User[] = [
   },
 ];
 
-// Seeded passwords for demo accounts
+// Seeded passwords for demo accounts (keyed by both username and email in lowercase)
 export const DEMO_CREDENTIALS: Record<string, string> = {
-  'admin@library.edu': 'admin123',
-  'member@library.edu': 'password123',
+  // Predefined Demo Accounts
+  'admin': 'Admin@123',
+  'admin@library.edu': 'Admin@123',
+  'tanvir': 'User@123',
+  'tanvir@student.edu': 'User@123',
+  'member@library.edu': 'User@123',
+  'student1': 'Student@123',
+  'student1@student.edu': 'Student@123',
+  'student2': 'Student@123',
+  'student2@student.edu': 'Student@123',
+
+  // Backward compatibility
+  'sarah': 'password123',
   'sarah.rahman@iu.ac.bd': 'password123',
+  'arif': 'password123',
   'arif.hasan@iu.ac.bd': 'password123',
+  'nafisa': 'password123',
   'nafisa.kamal@iu.ac.bd': 'password123',
 };
 

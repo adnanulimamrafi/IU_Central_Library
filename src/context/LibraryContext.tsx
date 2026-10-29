@@ -12,6 +12,7 @@ import { api } from '../services/api';
 import { storage } from '../services/storage';
 import { useAuth } from './AuthContext';
 import { isRecordForBook, isUserRecord } from '../utils/userRecords';
+import { normalizeErrorMessage, safeStringIncludes } from '../utils/errors';
 
 interface LibraryContextType {
   books: Book[];
@@ -181,9 +182,10 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         `"${book.title}" has been issued to your account for ${settings.defaultLoanDurationDays} days.`
       );
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = normalizeErrorMessage(err);
       // If error is 401 Authentication required, transparently re-authenticate with PHP session and retry once
-      if (err.message && (err.message.includes('Authentication required') || err.message.includes('401'))) {
+      if (safeStringIncludes(errMsg, 'Authentication required') || safeStringIncludes(errMsg, '401')) {
         try {
           const username =
             (currentUser as any).username ||
@@ -223,23 +225,22 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
             );
             return true;
           }
-        } catch (retryErr: any) {
-          addToast('error', 'Borrowing Failed', retryErr.message || 'Could not borrow book.');
+        } catch (retryErr: unknown) {
+          addToast('error', 'Borrowing Failed', normalizeErrorMessage(retryErr, 'Could not borrow book.'));
           return false;
         }
       }
 
       // If backend returned a specific business rule rejection (e.g. limit reached, copy unavailable, already borrowed)
       const isBusinessRuleError =
-        err.message &&
-        (err.message.includes('limit reached') ||
-          err.message.includes('on loan') ||
-          err.message.includes('already have an active') ||
-          err.message.includes('suspended') ||
-          err.message.includes('not found'));
+        safeStringIncludes(errMsg, 'limit reached') ||
+        safeStringIncludes(errMsg, 'on loan') ||
+        safeStringIncludes(errMsg, 'already have an active') ||
+        safeStringIncludes(errMsg, 'suspended') ||
+        safeStringIncludes(errMsg, 'not found');
 
       if (isBusinessRuleError) {
-        addToast('error', 'Borrowing Failed', err.message);
+        addToast('error', 'Borrowing Failed', errMsg);
         return false;
       }
 
@@ -261,8 +262,8 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
           `"${book.title}" has been issued to your account for ${settings.defaultLoanDurationDays} days.`
         );
         return true;
-      } catch (storageErr: any) {
-        addToast('error', 'Borrowing Failed', storageErr.message || err.message || 'Could not borrow book.');
+      } catch (storageErr: unknown) {
+        addToast('error', 'Borrowing Failed', normalizeErrorMessage(storageErr, errMsg || 'Could not borrow book.'));
         return false;
       }
     }
@@ -299,9 +300,10 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         `"${updated.bookTitle || 'Book'}" has been returned and checked into library inventory.`
       );
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = normalizeErrorMessage(err);
       // 1. Transparent re-authentication retry if 401
-      if (err.message && (err.message.includes('Authentication required') || err.message.includes('401'))) {
+      if (safeStringIncludes(errMsg, 'Authentication required') || safeStringIncludes(errMsg, '401')) {
         try {
           const username =
             (currentUser as any)?.username ||
@@ -343,20 +345,19 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
             );
             return true;
           }
-        } catch (retryErr: any) {
-          addToast('error', 'Return Failed', retryErr.message || 'Could not return book.');
+        } catch (retryErr: unknown) {
+          addToast('error', 'Return Failed', normalizeErrorMessage(retryErr, 'Could not return book.'));
           return false;
         }
       }
 
       // 2. Real business logic rejection from backend
       const isBusinessError =
-        err.message &&
-        (err.message.includes('already been returned') ||
-          err.message.includes('not authorized') ||
-          err.message.includes('not found'));
+        safeStringIncludes(errMsg, 'already been returned') ||
+        safeStringIncludes(errMsg, 'not authorized') ||
+        safeStringIncludes(errMsg, 'not found');
       if (isBusinessError) {
-        addToast('error', 'Return Failed', err.message);
+        addToast('error', 'Return Failed', errMsg);
         return false;
       }
 
@@ -373,8 +374,8 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
           `"${updated.bookTitle}" has been returned and checked into library inventory.`
         );
         return true;
-      } catch (storageErr: any) {
-        addToast('error', 'Return Failed', err.message || storageErr.message || 'Could not return book.');
+      } catch (storageErr: unknown) {
+        addToast('error', 'Return Failed', normalizeErrorMessage(storageErr, errMsg || 'Could not return book.'));
         return false;
       }
     }
@@ -401,9 +402,10 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         `Due date for "${updated.bookTitle || 'Book'}" extended by ${days} days.`
       );
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = normalizeErrorMessage(err);
       // 1. Transparent re-authentication retry if 401
-      if (err.message && (err.message.includes('Authentication required') || err.message.includes('401'))) {
+      if (safeStringIncludes(errMsg, 'Authentication required') || safeStringIncludes(errMsg, '401')) {
         try {
           const username =
             (currentUser as any)?.username ||
@@ -436,20 +438,19 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
             );
             return true;
           }
-        } catch (retryErr: any) {
-          addToast('error', 'Renewal Failed', retryErr.message || 'Could not extend loan.');
+        } catch (retryErr: unknown) {
+          addToast('error', 'Renewal Failed', normalizeErrorMessage(retryErr, 'Could not extend loan.'));
           return false;
         }
       }
 
       // 2. Real business logic rejection
       const isBusinessError =
-        err.message &&
-        (err.message.includes('Renewal limit reached') ||
-          err.message.includes('already returned') ||
-          err.message.includes('not authorized'));
+        safeStringIncludes(errMsg, 'Renewal limit reached') ||
+        safeStringIncludes(errMsg, 'already returned') ||
+        safeStringIncludes(errMsg, 'not authorized');
       if (isBusinessError) {
-        addToast('error', 'Renewal Failed', err.message);
+        addToast('error', 'Renewal Failed', errMsg);
         return false;
       }
 
@@ -465,8 +466,8 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
           `Due date for "${updated.bookTitle}" extended by ${days} days.`
         );
         return true;
-      } catch (storageErr: any) {
-        addToast('error', 'Renewal Failed', err.message || storageErr.message || 'Could not extend loan.');
+      } catch (storageErr: unknown) {
+        addToast('error', 'Renewal Failed', normalizeErrorMessage(storageErr, errMsg || 'Could not extend loan.'));
         return false;
       }
     }
@@ -507,9 +508,10 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await refreshData();
       addToast('info', 'Book Deleted', 'The book has been removed from the catalogue.');
       return true;
-    } catch (err: any) {
-      if (err.message && (err.message.includes('active loan') || err.message.includes('borrowed by members'))) {
-        addToast('error', 'Cannot Delete Book', err.message);
+    } catch (err: unknown) {
+      const errMsg = normalizeErrorMessage(err);
+      if (safeStringIncludes(errMsg, 'active loan') || safeStringIncludes(errMsg, 'borrowed by members')) {
+        addToast('error', 'Cannot Delete Book', errMsg);
         return false;
       }
       try {
@@ -518,8 +520,8 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         await refreshData();
         addToast('info', 'Book Deleted', `"${book?.title || 'Book'}" has been removed.`);
         return true;
-      } catch (storageErr: any) {
-        addToast('error', 'Cannot Delete Book', err.message || storageErr.message);
+      } catch (storageErr: unknown) {
+        addToast('error', 'Cannot Delete Book', errMsg || normalizeErrorMessage(storageErr));
         return false;
       }
     }
