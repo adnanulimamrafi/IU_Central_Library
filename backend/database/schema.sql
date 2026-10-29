@@ -3,11 +3,8 @@
 -- Designed for PHP 8.2+ with PDO Prepared Statements
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS `library_management_system`
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE `library_management_system`;
+-- Use the database selected in phpMyAdmin:
+-- iucentrallibrary_librarydb
 
 -- Disable foreign key checks during schema creation
 SET FOREIGN_KEY_CHECKS = 0;
