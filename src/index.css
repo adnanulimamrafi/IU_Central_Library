@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forest-950: #081713;
+  --color-forest-900: #0D241E;
+  --color-forest-850: #122C24;
+  --color-forest-800: #12332A;
+  --color-forest-750: #14392F;
+  --color-forest-700: #173F35;
+  --color-forest-600: #1E5144;
+  --color-forest-500: #2B6D5C;
+  --color-forest-400: #3E8A76;
+  --color-forest-300: #62AA97;
+  --color-forest-200: #9ECBBF;
+  --color-forest-100: #CEE4DE;
+  --color-forest-50: #EDF6F3;
+
+  --color-sage-50: #F6F9F7;
+  --color-sage-100: #EEF4F0;
+  --color-sage-200: #DCE8DF;
+  --color-sage-300: #C4D9CA;
+  --color-sage-400: #9CBDA5;
+  --color-sage-500: #7A9F85;
+
+  --color-amber-50: #FDF9F2;
+  --color-amber-100: #FBF5EB;
+  --color-amber-200: #F4E4C8;
+  --color-amber-300: #ECCFA1;
+  --color-amber-400: #E5B869;
+  --color-amber-500: #D6A75D;
+  --color-amber-600: #C49449;
+  --color-amber-700: #9D7433;
+  --color-amber-800: #785724;
+
+  --color-ivory-50: #FCFCF9;
+  --color-ivory-100: #FAF9F5;
+  --color-ivory-200: #F3EFE7;
+  --color-ivory-300: #E5E0D5;
+  --color-ivory-400: #D2CBC0;
+
+  --color-charcoal-950: #111413;
+  --color-charcoal-900: #181D1B;
+  --color-charcoal-800: #242B28;
+  --color-charcoal-700: #343E3A;
+  --color-charcoal-600: #4B5853;
+  --color-charcoal-500: #687973;
+  --color-charcoal-400: #899B95;
+  --color-charcoal-300: #B4C0BB;
+  --color-charcoal-200: #D6DDD9;
+  --color-charcoal-100: #EDF1EE;
+
+  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+@layer base {
+  :root {
+    --bg-main: #FAF9F5;
+    --card-bg: #FFFFFF;
+    --border-main: #E5E0D5;
+    --text-primary: #242B28;
+    --text-secondary: #687973;
+  }
+
+  .dark {
+    --bg-main: #0C1513;
+    --card-bg: #13201C;
+    --border-main: #20332D;
+    --text-primary: #EEF4F0;
+    --text-secondary: #9CBDA5;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+}
+
+/* Custom scrollbar for library elegance */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C4D9CA;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #20332D;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9CBDA5;
+}
