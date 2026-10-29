@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 
 # Backend local files
+.env
+.env.local
 backend/.env
+backend/.env.local
 backend/tests/*_cookies.txt
 *.sqlite

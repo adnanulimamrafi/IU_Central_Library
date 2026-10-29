@@ -12,7 +12,15 @@ class Auth {
         if (session_status() === PHP_SESSION_NONE) {
             // Configure session cookie parameters
             $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-                        (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+                        (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443) ||
+                        (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') ||
+                        (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower($_SERVER['HTTP_X_FORWARDED_SSL']) === 'on') ||
+                        (getenv('SESSION_SECURE') === 'true') ||
+                        ((getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? '')) === 'production');
+
+            // Cross-site cookie support (Vercel -> Alwaysdata) requires SameSite=None and Secure=true over HTTPS.
+            // On plain HTTP (local dev), browsers reject SameSite=None, so fallback to Lax and Secure=false.
+            $sameSite = $isSecure ? 'None' : 'Lax';
 
             session_set_cookie_params([
                 'lifetime' => 86400, // 24 hours
@@ -20,7 +28,7 @@ class Auth {
                 'domain' => '',
                 'secure' => $isSecure,
                 'httponly' => true,
-                'samesite' => 'Lax',
+                'samesite' => $sameSite,
             ]);
 
             session_start();
@@ -94,11 +102,14 @@ class Auth {
             setcookie(
                 session_name(),
                 '',
-                time() - 42000,
-                $params['path'],
-                $params['domain'],
-                $params['secure'],
-                $params['httponly']
+                [
+                    'expires' => time() - 42000,
+                    'path' => $params['path'],
+                    'domain' => $params['domain'],
+                    'secure' => $params['secure'],
+                    'httponly' => $params['httponly'],
+                    'samesite' => $params['samesite'] ?? 'Lax',
+                ]
             );
         }
 

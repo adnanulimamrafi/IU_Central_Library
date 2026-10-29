@@ -26,11 +26,24 @@ function runSeeder(): void {
     if ($driver === 'sqlite') {
         $schemaSql = file_get_contents(__DIR__ . '/schema_sqlite.sql');
         $pdo->exec($schemaSql);
+        echo "✓ Schema verified (SQLite)\n";
     } else {
-        $schemaSql = file_get_contents(__DIR__ . '/schema.sql');
-        $pdo->exec($schemaSql);
+        $hasUsers = false;
+        try {
+            $check = $pdo->query("SHOW TABLES LIKE 'users'")->fetch();
+            $hasUsers = !empty($check);
+        } catch (Throwable $e) {
+            $hasUsers = false;
+        }
+
+        if (!$hasUsers) {
+            $schemaSql = file_get_contents(__DIR__ . '/schema.sql');
+            $pdo->exec($schemaSql);
+            echo "✓ Schema created\n";
+        } else {
+            echo "✓ Schema already present (tables verified)\n";
+        }
     }
-    echo "✓ Schema verified\n";
 
     // 2. Seed Default Settings
     Setting::setMany([
