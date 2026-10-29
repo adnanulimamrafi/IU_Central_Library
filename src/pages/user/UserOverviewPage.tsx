@@ -58,7 +58,8 @@ export const UserOverviewPage: React.FC = () => {
             Welcome back, {currentUser.name}!
           </h1>
           <p className="text-xs sm:text-sm text-sage-200/90 leading-relaxed">
-            Roll: <strong>{currentUser.studentId || '2114028'}</strong> · Department of {currentUser.department || 'CSE'} (Session: {currentUser.session || '2021-22'}). Manage your borrowed textbooks and explore new arrivals.
+            {currentUser.studentId ? <>Roll: <strong>{currentUser.studentId}</strong> · </> : null}
+            Department of {currentUser.department || 'CSE'}{currentUser.session ? ` (Session: ${currentUser.session})` : ''}. Manage your borrowed textbooks and explore new arrivals.
           </p>
           <div className="pt-2 flex flex-wrap items-center gap-3">
             <Link

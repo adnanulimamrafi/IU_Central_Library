@@ -33,9 +33,8 @@ export const MyBooksPage: React.FC = () => {
   const [recordToReturn, setRecordToReturn] = useState<BorrowRecord | null>(null);
   const [recordToExtend, setRecordToExtend] = useState<BorrowRecord | null>(null);
 
-  if (!currentUser) return null;
-
   const myActiveRecords = useMemo(() => {
+    if (!currentUser) return [];
     return borrowRecords
       .filter((r) => isUserRecord(r, currentUser) && r.status === 'active')
       .filter((r) => {
@@ -59,7 +58,9 @@ export const MyBooksPage: React.FC = () => {
         }
         return true;
       });
-  }, [borrowRecords, currentUser.id, search, statusFilter]);
+  }, [borrowRecords, currentUser, search, statusFilter]);
+
+  if (!currentUser) return null;
 
   return (
     <div className="space-y-6">

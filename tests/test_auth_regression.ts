@@ -19,9 +19,8 @@ Object.defineProperty(globalThis, 'localStorage', {
 });
 
 // Import modules to test
-import { normalizeErrorMessage, isBackendUnavailable, safeStringIncludes } from '../src/utils/errors.ts';
+import { normalizeErrorMessage, isBackendUnavailable } from '../src/utils/errors.ts';
 import { storage } from '../src/services/storage.ts';
-import { DEMO_CREDENTIALS, INITIAL_USERS } from '../src/services/mockData.ts';
 
 console.log('====================================================');
 console.log('Running End-to-End Auth & Error Regression Test Suite');

@@ -37,7 +37,7 @@ export const AdminDashboardLayout: React.FC = () => {
             </Link>
             <Link
               to="/admin/login"
-              className="py-2 px-4 border border-sage-300 text-xs font-semibold text-charcoal-700 rounded-xl"
+              className="py-2 px-4 border border-sage-300 dark:border-charcoal-700 text-xs font-semibold text-charcoal-700 dark:text-sage-300 hover:bg-sage-100 dark:hover:bg-charcoal-800 rounded-xl transition-colors"
             >
               Switch to Admin Account
             </Link>

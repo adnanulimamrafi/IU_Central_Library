@@ -251,7 +251,7 @@ export const LoginPage: React.FC = () => {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded border-sage-300 text-forest-700 focus:ring-forest-600"
+                className="rounded border-sage-300 dark:border-charcoal-600 bg-white dark:bg-charcoal-800 text-forest-700 dark:text-amber-500 focus:ring-forest-600 dark:focus:ring-amber-400"
               />
               <span>Remember this session</span>
             </label>

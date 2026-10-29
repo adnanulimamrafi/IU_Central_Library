@@ -11,10 +11,6 @@ import {
   History,
   Search,
   Download,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
 } from 'lucide-react';
 
 export const BorrowHistoryPage: React.FC = () => {
@@ -24,9 +20,8 @@ export const BorrowHistoryPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'returned'>('all');
 
-  if (!currentUser) return null;
-
   const myRecords = useMemo(() => {
+    if (!currentUser) return [];
     return borrowRecords
       .filter((r) => isUserRecord(r, currentUser))
       .filter((r) => {
@@ -42,6 +37,8 @@ export const BorrowHistoryPage: React.FC = () => {
         return true;
       });
   }, [borrowRecords, currentUser, search, statusFilter]);
+
+  if (!currentUser) return null;
 
   const handleExportCsv = () => {
     const rows = myRecords.map((r) => ({

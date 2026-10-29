@@ -113,11 +113,13 @@ export const ProfilePage: React.FC = () => {
             <h3 className="font-serif text-base font-bold text-charcoal-900 dark:text-ivory-100">
               {currentUser.name}
             </h3>
-            <p className="text-xs text-forest-700 dark:text-amber-400 font-semibold mt-0.5">
-              Roll No: {currentUser.studentId || '2114028'}
-            </p>
+            {currentUser.studentId && (
+              <p className="text-xs text-forest-700 dark:text-amber-400 font-semibold mt-0.5">
+                Roll No: {currentUser.studentId}
+              </p>
+            )}
             <p className="text-[11px] text-charcoal-500 dark:text-sage-400 mt-1">
-              {currentUser.department}
+              {currentUser.department || 'Islamic University'}
             </p>
 
             <div className="w-full mt-4 pt-4 border-t border-sage-100 dark:border-charcoal-800 text-left text-xs space-y-2 text-charcoal-600 dark:text-sage-300">

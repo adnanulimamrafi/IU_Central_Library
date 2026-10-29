@@ -75,11 +75,11 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({ onCloseMobile }) => {
                 {currentUser.name}
               </h4>
               <p className="text-[11px] text-forest-700 dark:text-amber-400 font-medium truncate">
-                Roll: {currentUser.studentId || '2114028'}
+                {currentUser.studentId ? `Roll: ${currentUser.studentId}` : (currentUser.role === 'admin' ? 'Administrator' : 'Student Member')}
               </p>
               <div className="flex items-center gap-1 text-[10px] text-charcoal-500 dark:text-sage-400 mt-0.5">
                 <GraduationCap className="w-3 h-3 shrink-0" />
-                <span className="truncate">{currentUser.department || 'CSE, IU'}</span>
+                <span className="truncate">{currentUser.department || 'Islamic University'}</span>
               </div>
             </div>
           </div>
