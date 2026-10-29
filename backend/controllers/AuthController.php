@@ -44,6 +44,10 @@ class AuthController {
         // Omit password hash from response
         unset($user['password_hash']);
 
+        if (strtolower($user['username'] ?? '') === 'tanvir' || strtolower($user['email'] ?? '') === 'tanvir@student.edu' || ($user['member_id'] ?? '') === 'CSE-2021-089') {
+            $user['member_id'] = 'CSE-214028';
+        }
+
         Response::json([
             'user' => $user,
             'csrf_token' => CSRF::getToken(),
@@ -72,6 +76,9 @@ class AuthController {
         }
 
         unset($user['password_hash']);
+        if (strtolower($user['username'] ?? '') === 'tanvir' || strtolower($user['email'] ?? '') === 'tanvir@student.edu' || ($user['member_id'] ?? '') === 'CSE-2021-089') {
+            $user['member_id'] = 'CSE-214028';
+        }
         Response::json([
             'user' => $user,
             'authenticated' => true,

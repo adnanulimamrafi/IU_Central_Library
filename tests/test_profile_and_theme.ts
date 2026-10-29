@@ -17,14 +17,14 @@ function formatUserSubtitle(user: { role: string; studentId?: string }): string 
   if (user.role === 'admin') {
     return 'Administrator';
   }
-  return user.studentId ? `ROLL: ${user.studentId}` : 'IU Member';
+  return user.studentId ? `Roll: ${user.studentId}` : 'IU Member';
 }
 
 console.log('--- Testing Profile Avatar & Subtitle Logic ---');
 
 // 1. Initials generation
-const initials1 = getInitials('Tanvir Hossain');
-console.assert(initials1 === 'TH', `Expected TH but got ${initials1}`);
+const initials1 = getInitials('Tanvir Ahmed');
+console.assert(initials1 === 'TA', `Expected TA but got ${initials1}`);
 const initials2 = getInitials('Single');
 console.assert(initials2 === 'S', `Expected S but got ${initials2}`);
 const initials3 = getInitials(undefined);
@@ -33,9 +33,9 @@ const initials4 = getInitials('Adnan Ul Imam Rafi');
 console.assert(initials4 === 'AU', `Expected AU but got ${initials4}`);
 console.log('✓ Initials fallback helper passed all assertions');
 
-// 2. Roll / subtitle formatting (preventing hyphen wrap)
-const sub1 = formatUserSubtitle({ role: 'student', studentId: 'CSE-2021-089' });
-console.assert(sub1 === 'ROLL: CSE-2021-089', `Expected 'ROLL: CSE-2021-089' but got '${sub1}'`);
+// 2. Roll / subtitle formatting (Roll: CSE-214028)
+const sub1 = formatUserSubtitle({ role: 'student', studentId: 'CSE-214028' });
+console.assert(sub1 === 'Roll: CSE-214028', `Expected 'Roll: CSE-214028' but got '${sub1}'`);
 const sub2 = formatUserSubtitle({ role: 'admin' });
 console.assert(sub2 === 'Administrator', `Expected 'Administrator' but got '${sub2}'`);
 const sub3 = formatUserSubtitle({ role: 'student' });
@@ -61,5 +61,24 @@ const adminActions = [
 console.assert(studentActions.length === 5, 'Student actions should contain exactly 5 navigation items');
 console.assert(adminActions.length === 5, 'Admin actions should contain exactly 5 navigation items');
 console.log('✓ All 5 required dropdown action destinations verified');
+
+// 4. Test Tanvir roll migration
+import { storage } from '../src/services/storage.ts';
+
+// Simulate localStorage with old CSE-2021-089 roll
+storage.setCurrentUser({
+  id: 'u-tanvir',
+  name: 'Tanvir Ahmed',
+  username: 'tanvir',
+  email: 'tanvir@student.edu',
+  role: 'member',
+  studentId: 'CSE-2021-089',
+  createdAt: '2025-01-01',
+  status: 'active'
+});
+
+const migrated = storage.getCurrentUser();
+console.assert(migrated?.studentId === 'CSE-214028', `Expected CSE-214028 but got ${migrated?.studentId}`);
+console.log('✓ Stored user roll automatically migrated to CSE-214028');
 
 console.log('--- All Profile & Responsiveness Logic Verified Successfully ---');

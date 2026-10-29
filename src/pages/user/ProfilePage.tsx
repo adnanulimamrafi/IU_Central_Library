@@ -115,7 +115,7 @@ export const ProfilePage: React.FC = () => {
             </h3>
             {currentUser.studentId && (
               <p className="text-xs text-forest-700 dark:text-amber-400 font-semibold mt-0.5">
-                Roll No: {currentUser.studentId}
+                Roll: {currentUser.studentId}
               </p>
             )}
             <p className="text-[11px] text-charcoal-500 dark:text-sage-400 mt-1">

@@ -108,11 +108,11 @@ class StorageService {
           usersChanged = true;
         } else {
           // Keep username & studentId synchronized
-          if (!users[existingIdx].username && initialUser.username) {
+          if (initialUser.username && users[existingIdx].username !== initialUser.username) {
             users[existingIdx].username = initialUser.username;
             usersChanged = true;
           }
-          if (!users[existingIdx].studentId && initialUser.studentId) {
+          if (initialUser.studentId && users[existingIdx].studentId !== initialUser.studentId) {
             users[existingIdx].studentId = initialUser.studentId;
             usersChanged = true;
           }
@@ -471,13 +471,35 @@ class StorageService {
   }
 
   public getCurrentUser(): User | null {
-    return this.getItem<User | null>(STORAGE_KEYS.CURRENT_USER, null);
+    const user = this.getItem<User | null>(STORAGE_KEYS.CURRENT_USER, null);
+    if (user) {
+      const isTanvir =
+        (user.username && user.username.toLowerCase() === 'tanvir') ||
+        (user.email && user.email.toLowerCase() === 'tanvir@student.edu') ||
+        user.id === 'u-tanvir' ||
+        user.id === '2';
+
+      if (isTanvir && user.studentId !== 'CSE-214028') {
+        user.studentId = 'CSE-214028';
+        this.setItem(STORAGE_KEYS.CURRENT_USER, user);
+      }
+    }
+    return user;
   }
 
   public setCurrentUser(user: User | null): void {
     if (!user) {
       localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
     } else {
+      const isTanvir =
+        (user.username && user.username.toLowerCase() === 'tanvir') ||
+        (user.email && user.email.toLowerCase() === 'tanvir@student.edu') ||
+        user.id === 'u-tanvir' ||
+        user.id === '2';
+
+      if (isTanvir && user.studentId !== 'CSE-214028') {
+        user.studentId = 'CSE-214028';
+      }
       this.setItem(STORAGE_KEYS.CURRENT_USER, user);
     }
   }

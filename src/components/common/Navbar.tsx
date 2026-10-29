@@ -194,11 +194,11 @@ export const Navbar: React.FC = () => {
                       <span className="text-xs font-semibold text-charcoal-900 dark:text-ivory-100 block leading-tight truncate whitespace-nowrap">
                         {currentUser.name}
                       </span>
-                      <span className="text-[10px] text-forest-600 dark:text-sage-400 block uppercase font-medium tracking-wide truncate whitespace-nowrap mt-0.5">
+                      <span className="text-[10px] text-forest-600 dark:text-sage-400 block font-medium tracking-wide truncate whitespace-nowrap mt-0.5">
                         {currentUser.role === 'admin'
                           ? 'Administrator'
                           : currentUser.studentId
-                          ? `ROLL: ${currentUser.studentId}`
+                          ? `Roll: ${currentUser.studentId}`
                           : 'IU Member'}
                       </span>
                     </div>
@@ -458,7 +458,7 @@ export const Navbar: React.FC = () => {
                         {currentUser.email}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-forest-700 dark:text-amber-400 font-semibold uppercase">
+                        <span className="text-[10px] text-forest-700 dark:text-amber-400 font-semibold">
                           {currentUser.role === 'admin'
                             ? 'Administrator'
                             : currentUser.studentId

@@ -9,7 +9,7 @@ A native, lightweight PHP 8.2+ MVC backend with PDO prepared statements and sess
 | Role | Username | Password | Full Name | Member ID |
 |---|---|---|---|---|
 | **Administrator** | `admin` | `Admin@123` | System Administrator | EMP-ADM-001 |
-| **Member (Student)** | `tanvir` | `User@123` | Tanvir Ahmed | CSE-2021-089 |
+| **Member (Student)** | `tanvir` | `User@123` | Tanvir Ahmed | CSE-214028 |
 | **Member (Student)** | `student1` | `Student@123` | Nusrat Jahan | CSE-2021-042 |
 | **Member (Student)** | `student2` | `Student@123` | Ariful Islam | EEE-2021-015 |
 
